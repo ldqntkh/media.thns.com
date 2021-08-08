@@ -16,6 +16,15 @@ export class MediaController {
 
     }
 
+    @Get('upload-video')
+    getForm() : string {
+        return `<form method="POST" enctype="multipart/form-data" name="upload_form">
+                <input type="file" name="video"/>
+                <input type="hidden" name="post_id" value="20" />
+                <button>Submit</button>
+            </form>`
+    }
+
     @Get(':post_id/:filename')
     async serveAvatar(@Param() params: MediaFileDto, @Res() res): Promise<any> {
         res.sendFile(`${params.post_id}/${params.filename}`, { root: 'public'});
