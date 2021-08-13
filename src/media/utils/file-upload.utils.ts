@@ -8,7 +8,7 @@ export const imageFileFilter = (req, file, callback) => {
 };
 
 export const videoFileFilter = (req, file, callback) => {
-    if (!file.originalname.match(/\.(mp4|mov)$/)) {
+    if (!file.originalname.toLowerCase().match(/\.(mp4|mov)$/)) {
         return callback(new Error('Only video files are allowed!'), false);
     }
     callback(null, true);
