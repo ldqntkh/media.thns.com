@@ -15,6 +15,6 @@ async function bootstrap() {
     httpsOptions,
   });
   app.use(express.static(join(process.cwd(), '../public/')));
-  await app.listen(80);
+  await app.listen(8088);
 }
 bootstrap();
