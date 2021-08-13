@@ -24,11 +24,24 @@ export class MediaService {
         
         var mc = new MediaConverter({ videoFormats: ['mp4']});
         
-        let rs = await mc.convert(oldpath , "50%x50%", "public/" + body.post_id );
-        console.log(rs)
+        let rs = await mc.convert(oldpath , "80%x80%", "public/" + body.post_id );
+        
         fs.unlinkSync(oldpath);
         return {
             file_url: newpath
         }
+    }
+
+    async handleUploadImage( image: Express.Multer.File , body: MediaBodyDto) {
+        let public_path = './public/' + body.post_id;
+        
+        if (!fs.existsSync(public_path)) {
+            fs.mkdirSync(public_path);
+        }
+
+        let oldPath = image.path;
+        var newpath = `${public_path}/${image.originalname}`;
+        fs.renameSync( oldPath, newpath );
+        return `/media/${body.post_id}/${image.originalname}`;
     }
 }

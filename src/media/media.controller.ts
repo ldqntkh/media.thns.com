@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UploadedFile, UseInterceptors, Body, Param, Res } from '@nestjs/common';
+import { Controller, Get, Post, UploadedFile, UseInterceptors, Body, Param, Res, Headers } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MediaService } from './media.service';
 
@@ -7,19 +7,40 @@ import { MediaBodyDto } from './dto/media.body.dto';
 import { MediaFileDto } from './dto/media.file.dto';
 
 import { diskStorage } from 'multer';
-import { editFileName, videoFileFilter } from './utils/file-upload.utils';
+import { editFileName, videoFileFilter, imageFileFilter } from './utils/file-upload.utils';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+// event
+import { MediaCreatedEvent } from '../event-emitter/media/media.event.dto'; 
+
+const accept_url = ['tinhocngoisao.com', 'https://tinhocngoisao.com', 'localhost:8088', 'localhost:5502'];
 
 @Controller('media')
 export class MediaController {
 
-    constructor( private readonly mediaService: MediaService ) {
+    constructor( private readonly mediaService: MediaService, private eventEmitter: EventEmitter2 ) {
 
     }
 
     @Get('upload-video')
-    getForm() : string {
+    getForm(@Headers() headers) : string {
+        // if( accept_url.includes( headers.host ) == false ) {
+        //     throw new Error('Cannot accept this host');
+        // }
         return `<form method="POST" enctype="multipart/form-data" name="upload_form">
                 <input type="file" name="video"/>
+                <input type="hidden" name="post_id" value="20" />
+                <button>Submit</button>
+            </form>`
+    }
+
+    @Get('upload-image')
+    getFormImage(@Headers() headers) : string {
+        // if( accept_url.includes( headers.host ) == false ) {
+        //     throw new Error('Cannot accept this host');
+        // }
+        return `<form method="POST" enctype="multipart/form-data" name="upload_form">
+                <input type="file" name="image"/>
                 <input type="hidden" name="post_id" value="20" />
                 <button>Submit</button>
             </form>`
@@ -38,7 +59,39 @@ export class MediaController {
         }),
         fileFilter: videoFileFilter
     }))
-    uploadVideo(@Body() body: MediaBodyDto, @UploadedFile() video: Express.Multer.File) : object {
-        return this.mediaService.handleUploadVideo(video, body);
+    uploadVideo(@Body() body: MediaBodyDto, @UploadedFile() video: Express.Multer.File, @Headers() headers) : object {
+        
+        // if( accept_url.includes( headers.host ) == false ) {
+        //     throw new Error('Cannot accept this host');
+        // }
+
+        let mediaEvent = new MediaCreatedEvent();
+        mediaEvent.oldPath = video.path;
+        mediaEvent.newPath = "public/" + body.post_id;
+        
+        let file_url = `/media/${body.post_id}/${video.filename.replace(/\..*?$/, '.mp4')}`;
+        
+        this.eventEmitter.emit('media.video.uploaded', mediaEvent);
+        return {
+            file_url: file_url
+        };
+    }
+
+
+    @Post('upload-image')
+    @UseInterceptors(
+        FileInterceptor('image', {
+            storage: diskStorage({
+                destination: './public',
+                filename: editFileName,
+            }),
+            fileFilter: imageFileFilter,
+        }),
+    )
+    async uploadedFile(@Body() body: MediaBodyDto, @UploadedFile() image, @Headers() headers) {
+        // if( accept_url.includes( headers.host ) == false ) {
+        //     throw new Error('Cannot accept this host');
+        // }
+        return this.mediaService.handleUploadImage( image, body );
     }
 }

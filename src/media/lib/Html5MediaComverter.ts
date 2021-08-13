@@ -38,8 +38,6 @@ export function MediaConverter(options) {
             var converter = VideoConverter.defaults[format];
             if (converter) {
                 var target = path.join(targetDir, path.basename(source).replace(/\..*?$/, converter.extName()));
-                console.log('FUCL', source)
-                console.log(target)
                 converter.convert(source, size, target, defer.makeNodeResolver());
                 return defer.promise;
             } else {
