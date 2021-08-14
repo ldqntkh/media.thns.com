@@ -13,10 +13,14 @@ import { MediaEventModule } from './event-emitter/media/media.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
+let envpath = '.env';
+if( process.env.NODE_ENV == 'dev' ) {
+  envpath = 'dev.env';
+}
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `${process.env.NODE_ENV}.env`
+      envFilePath: envpath
     }),
     EventEmitterModule.forRoot(),
     MediaEventModule,
