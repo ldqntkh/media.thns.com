@@ -13,7 +13,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 // event
 import { MediaCreatedEvent } from '../event-emitter/media/media.event.dto'; 
 
-const accept_url = ['tinhocngoisao.com', 'https://tinhocngoisao.com', 'localhost:8088', 'localhost:5502'];
+const accept_url = ['tinhocngoisao.com', 'https://tinhocngoisao.com', 'media.tinhocngoisao.com', 'localhost:8088', 'localhost:5502'];
 
 @Controller('media')
 export class MediaController {
