@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
 
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
@@ -14,6 +15,9 @@ import { join } from 'path';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: `${process.env.NODE_ENV}.env`
+    }),
     EventEmitterModule.forRoot(),
     MediaEventModule,
     ServeStaticModule.forRoot({

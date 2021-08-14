@@ -24,9 +24,9 @@ export class MediaController {
 
     @Get('upload-video')
     getForm(@Headers() headers) : string {
-        // if( accept_url.includes( headers.host ) == false ) {
-        //     throw new Error('Cannot accept this host');
-        // }
+        if( accept_url.includes( headers.host ) == false ) {
+            throw new Error('Cannot accept this host');
+        }
         return `<form method="POST" enctype="multipart/form-data" name="upload_form">
                 <input type="file" name="video"/>
                 <input type="hidden" name="post_id" value="20" />
@@ -36,9 +36,9 @@ export class MediaController {
 
     @Get('upload-image')
     getFormImage(@Headers() headers) : string {
-        // if( accept_url.includes( headers.host ) == false ) {
-        //     throw new Error('Cannot accept this host');
-        // }
+        if( accept_url.includes( headers.host ) == false ) {
+            throw new Error('Cannot accept this host');
+        }
         return `<form method="POST" enctype="multipart/form-data" name="upload_form">
                 <input type="file" name="image"/>
                 <input type="hidden" name="post_id" value="20" />
@@ -61,15 +61,15 @@ export class MediaController {
     }))
     uploadVideo(@Body() body: MediaBodyDto, @UploadedFile() video: Express.Multer.File, @Headers() headers) : object {
         
-        // if( accept_url.includes( headers.host ) == false ) {
-        //     throw new Error('Cannot accept this host');
-        // }
+        if( accept_url.includes( headers.host ) == false ) {
+            throw new Error('Cannot accept this host');
+        }
 
         let mediaEvent = new MediaCreatedEvent();
         mediaEvent.oldPath = video.path;
         mediaEvent.newPath = "public/" + body.post_id;
         
-        let file_url = `/media/${body.post_id}/${video.filename.replace(/\..*?$/, '.mp4')}`;
+        let file_url = `${process.env.DOMAIN_NAME}/media/${body.post_id}/${video.filename.replace(/\..*?$/, '.mp4')}`;
         
         this.eventEmitter.emit('media.video.uploaded', mediaEvent);
         return {
@@ -88,10 +88,31 @@ export class MediaController {
             fileFilter: imageFileFilter,
         }),
     )
-    async uploadedFile(@Body() body: MediaBodyDto, @UploadedFile() image, @Headers() headers) {
-        // if( accept_url.includes( headers.host ) == false ) {
-        //     throw new Error('Cannot accept this host');
-        // }
-        return this.mediaService.handleUploadImage( image, body );
+    uploadedFile(@Body() body: MediaBodyDto, @UploadedFile() image, @Headers() headers) : object {
+        if( accept_url.includes( headers.host ) == false ) {
+            throw new Error('Cannot accept this host');
+        }
+        let url = this.mediaService.handleUploadImage( image, body );
+        return {
+            file_url: url
+        };
+    }
+
+    @Post('delete-media')
+    deleteMedia( @Body() body: MediaBodyDto, @Headers() headers ) {
+        let post_id = body.post_id;
+        let file_url = body.file_url;
+        
+        let file_names = file_url.split( `/media/${post_id}/` );
+        if( !file_names || file_names.length < 2 ) {
+            return {
+                success: false
+            }
+        }
+        let file_name = file_names[1];
+        
+        return {
+            success: true
+        }
     }
 }

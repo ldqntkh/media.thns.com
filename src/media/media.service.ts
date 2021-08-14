@@ -32,7 +32,7 @@ export class MediaService {
         }
     }
 
-    async handleUploadImage( image: Express.Multer.File , body: MediaBodyDto) {
+    handleUploadImage( image: Express.Multer.File , body: MediaBodyDto) {
         let public_path = './public/' + body.post_id;
         
         if (!fs.existsSync(public_path)) {
@@ -42,6 +42,6 @@ export class MediaService {
         let oldPath = image.path;
         var newpath = `${public_path}/${image.originalname}`;
         fs.renameSync( oldPath, newpath );
-        return `/media/${body.post_id}/${image.originalname}`;
+        return `${process.env.DOMAIN_NAME}/media/${body.post_id}/${image.originalname}`;
     }
 }
