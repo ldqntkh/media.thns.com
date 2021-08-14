@@ -60,7 +60,7 @@ export class MediaController {
         fileFilter: videoFileFilter
     }))
     uploadVideo(@Body() body: MediaBodyDto, @UploadedFile() video: Express.Multer.File, @Headers() headers) : object {
-        
+        console.log(headers.host);
         if( accept_url.includes( headers.host ) == false ) {
             throw new Error('Cannot accept this host');
         }
@@ -100,6 +100,9 @@ export class MediaController {
 
     @Post('delete-media')
     deleteMedia( @Body() body: MediaBodyDto, @Headers() headers ) {
+        if( accept_url.includes( headers.host ) == false ) {
+            throw new Error('Cannot accept this host');
+        }
         let post_id = body.post_id;
         let file_url = body.file_url;
         
